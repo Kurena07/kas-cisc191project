@@ -1,4 +1,4 @@
-package domain.rpg.managers;
+package domain.rpg.story;
 
 import java.io.*;
 import java.util.*;

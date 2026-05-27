@@ -1,4 +1,6 @@
-package domain.rpg.data.traits;
+package domain.rpg.data.items;
+
+import domain.rpg.data.characters.Character;
 
 /**
  * Lead Author:
@@ -16,32 +18,30 @@ package domain.rpg.data.traits;
  * Class is
  */
 
-public class Item
+public abstract class Item
 {
 	private String name;
 	private String description;
 	private int effectAmount;
+	private final String type;
 	
 	/**
 	 * 
 	 */
-	public Item(String name, int amount, String desc)
+	public Item(String name, int amount, String desc, String type)
 	{
 		this.name = name;
 		effectAmount = amount;
 		description = desc;
+		this.type = type;
 	}
 	
-	public int useItem(int target)
-	{
-		return target += effectAmount;
-	}
+	public abstract void useItem(Character target);
 	
 	@Override
 	public String toString()
 	{
-		// TODO Auto-generated method stub
-		return "";
+		return name + " (" + description + ")";
 	}
 	
 	/**
@@ -58,6 +58,19 @@ public class Item
 	public int getAmount()
 	{
 		return effectAmount;
+	}
+	
+	/**
+	 * @return the description
+	 */
+	public String getDescription()
+	{
+		return description;
+	}
+
+	public String getType()
+	{
+		return type;
 	}
 
 	

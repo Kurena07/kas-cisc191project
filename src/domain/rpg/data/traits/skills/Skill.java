@@ -1,5 +1,7 @@
 package domain.rpg.data.traits.skills;
 
+import java.util.*;
+
 import domain.rpg.data.characters.Character;
 
 /**
@@ -20,29 +22,35 @@ public class Skill
 {
 	private String name;
 	private String description;
-	private int effectAmount;
 	private int cost;
 	private Character user;
 	private Character target;
+	private boolean singleTarget;
 	
 	public enum Types {
 		ENEMY_SKILL,
 		CHARGED_SLASH,
-		WIDE_SLASH
+		WIDE_SLASH, 
+		
 	};
 	
 	/**
 	 * 
 	 */
-	public Skill(String name, int amount, int pointCost, String desc)
+	public Skill(String name, int pointCost, boolean single, String desc)
 	{
 		this.name = name;
-		effectAmount = amount;
 		cost = pointCost;
 		description = desc;
+		singleTarget = single;
 	}
 	
-	public void useSkill(Character target, Character user) {}
+	public void useSkill(Character user, List<Character> targets) {}
+	
+	public void useMP(Character user)
+	{
+		user.setCurrentMP(user.getCurrentMP() - cost);
+	}
 	
 	public int getCost()
 	{
@@ -66,15 +74,22 @@ public class Skill
 	{
 		return description;
 	}
-
-	public int getEffectAmount()
-	{
-		return effectAmount;
-	}
 	
 	public void setCharacters(Character target, Character user)
 	{
 		this.user = user;
 		this.target = target;
 	}
+
+	public boolean isSingleTarget()
+	{
+		return singleTarget;
+	}
+
+	public void setSingleTarget(boolean singleTarget)
+	{
+		this.singleTarget = singleTarget;
+	}
+	
+	
 }

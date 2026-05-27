@@ -1,6 +1,7 @@
 package domain.rpg.data.characters;
-import domain.rpg.data.traits.*;
+import domain.rpg.data.items.Item;
 import domain.rpg.data.traits.classes.*;
+import domain.rpg.data.items.*;
 
 import java.util.*;
 
@@ -26,8 +27,6 @@ public class Player extends Character
 {
 	private int level;
 	private CharacterClass charClass;
-	private int currentStamina;
-	private int maxStamina;
 	private Skill[] skills = new Skill[2];
 	private ArrayList<Item> inventory = new ArrayList<>();
 	
@@ -37,85 +36,23 @@ public class Player extends Character
 	public Player()
 	{
 		//TODO
-		setName("Player");
+		super("Player", 100, 10, 50);
 		level = 1;
-	}
-
-	public void useItem(Item item)
-	{
-		//TODO
-		// check or simplify
 		
-		if (inventory.isEmpty())
-		{
-			//TODO no items message
-			System.out.println("Your inventory is empty!");
-		}
-		else if (item.getName().equals("Healing Potion"))
-		{
-			if (getCurrentHP() == getMaxHP())
-			{
-				//message that we're already at max hp
-			}
-			else if (item.getAmount() + getCurrentHP() > getMaxHP())
-			{
-				setCurrentHP(getMaxHP());
-				//message that hp is maxed out now
-			}
-			else
-			{
-				setCurrentHP(item.useItem(getCurrentHP()));
-				//message
-			}
-		}
-		else if (item.getName().equals("Stamina Potion"))
-		{
-			if (currentStamina == maxStamina)
-			{
-				//message that Stamina is already maxed out
-			}
-			else if (item.getAmount() + currentStamina > maxStamina)
-			{
-				currentStamina = maxStamina;
-				//message
-			}
-			else
-			{
-				currentStamina = item.useItem(currentStamina);
-				//message
-			}
-		}
-		//remove item from inventory
-		inventory.remove(item);
 	}
 	
-	public boolean skillUsable(Skill skill)
-	{
-		if (skill.getCost() > currentStamina)
-		{
-			//TODO not enough energy message
-			System.out.println("You don't have enough skill points!");
-			return false;
-		}
-		else
-		{
-			//otherwise, consume skill points
-			currentStamina -= skill.getCost();
-			return true;
-		}
-	}
-	
-	public void setStats(int hp, int att, int Stamina)
+	public void setStats(int hp, int att, int mp)
 	{
 		setMaxHP(hp);
 		setAttack(att);
-		maxStamina = Stamina;
+		setMaxMP(mp);
+		resetStats();
 	}
 	
 	public void resetStats()
 	{
 		setCurrentHP(getMaxHP());
-		currentStamina = maxStamina;
+		setCurrentMP(getMaxMP());
 	}
 	
   	public void setSkills(Skill skill1, Skill skill2)
@@ -124,19 +61,45 @@ public class Player extends Character
 		skills[1] = skill2;
 	}
   	
-  	public Skill getSkill(int index)
+  	/**
+	 * @param inventory the inventory to set
+	 */
+	public void setInventory(ArrayList<Item> inventory)
+	{
+		this.inventory = inventory;
+	}
+	
+	public ArrayList<Item> getInventory()
+	{
+		return inventory;
+	}
+  	
+  	public Skill getFirstSkill()
   	{
-  		return skills[index];
+  		return skills[0];
+  	}
+  	
+  	public Skill getSecondSkill()
+  	{
+  		return skills[1];
+  	}
+  	
+  	public Skill[] getSkills()
+  	{
+  		return skills;
+  	}
+  	
+  	public Item getItem(int index)
+  	{
+  		return inventory.get(index);
   	}
 	
 	public void levelUp()
 	{
 		//TODO
 		level ++;
-		setMaxHP(getMaxHP() + 10);
-		setAttack(getAttack() + 10);
+		setStats(getMaxHP() + 10, getAttack() + 10, getMaxMP() + 10);
 		resetStats();
-		maxStamina += 10;
 	}
 	
 	/**
@@ -145,13 +108,20 @@ public class Player extends Character
 	public void setCharClass(CharacterClass.Types classType)
 	{
 		this.charClass = ClassFactory.fromType(classType);
-		this.setStats(charClass.getBaseHP(), charClass.getBaseAttack(), charClass.getBaseStamina());
+		this.setStats(charClass.getBaseHP(), charClass.getBaseAttack(), charClass.getBaseMP());
 		this.setSkills(charClass.getSkill(0), charClass.getSkill(1));
 	}
 	
 	@Override
 	public String toString()
 	{
-		return getName() + "\n Level " + level + " HP: " + getMaxHP() + " Attack: " + getAttack() + " Stamina: " + maxStamina;
+		return getName() + " | Level " + level + " | HP " + getCurrentHP() + "/" + getMaxHP() + 
+				" | MP " + getCurrentMP() + "/" + getMaxMP();
 	}
+
+	public int getLevel()
+	{
+		return level;
+	}
+
 }

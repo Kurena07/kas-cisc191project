@@ -27,32 +27,78 @@ public class SkillFactory
 			//TODO
 			case ENEMY_SKILL: 
 				desc = ""; 
-				return new Skill("", -1, -1, desc) {
-					public void useSkill(Character target, Character user)
+				return new Skill("", 15, true, desc) {
+					public void useSkill(Character user, List<Character> targets)
 					{
 						//TODO
+						useMP(user);
+						int dmg = (int) (user.getAttack() * 2);
+						targets.getFirst().setCurrentHP(targets.getFirst().takeDamage(dmg));
 					}
 				};
 			case CHARGED_SLASH:
 				desc = "";
-				return new Skill("Charged Slash", -1, -1, desc) {
-					public void useSkill(Character target, Character user)
+				return new Skill("Charged Slash", 5, true, desc) {
+					public void useSkill(Character user, List<Character> targets)
 					{
+						useMP(user);
 						int dmg = (int) (user.getAttack()* 1.75);
-						target.takeDamage(dmg);
+						targets.getFirst().setCurrentHP(targets.getFirst().takeDamage(dmg));
 					}
 				};
 			case WIDE_SLASH:
 				desc = "";
-				return new Skill("Wide Slash", -1, -1, desc) {
-					public void useSkill(List<Character> targets, Character user)
+				return new Skill("Wide Slash", 10, false, desc) {
+					public void useSkill(Character user, List<Character> targets)
 					{
+						useMP(user);
 						for (Character target : targets)
 						{
 							user.attack(target);
 						}
 					}
 				};
+//			case MAGIC:
+//				desc = "";
+//				return new Skill("", 10, false, desc) {
+//					public void useSkill(Character user, List<Character> targets)
+//					{
+//						useMP(user);
+//						for (Character target : targets)
+//						{
+//							user.attack(target);
+//						}
+//					}
+//				};
+//			case LIFE_DRAIN:
+//				desc = "";
+//				return new Skill("", 10, false, desc) {
+//					public void useSkill(Character user, List<Character> targets)
+//					{
+//						useMP(user);
+//						//drain hp from enemy and recover
+//					}
+//				};
+//			case CRITICAL_STRIKE:
+//				desc = "";
+//				return new Skill("", 10, false, desc) {
+//					public void useSkill(Character user, List<Character> targets)
+//					{
+//						useMP(user);
+//						//x2 damage
+//						//random chance of doing x3 damage
+//					}
+//				};
+//			case DOUBLEHIT:
+//				desc = "";
+//				return new Skill("", 10, false, desc) {
+//					public void useSkill(Character user, List<Character> targets)
+//					{
+//						useMP(user);
+//						//hit multiple time at random enemies
+//						//or hit one enemy multiple times (random amount)
+//					}
+//				};
 			default:
 				return null;
 		}

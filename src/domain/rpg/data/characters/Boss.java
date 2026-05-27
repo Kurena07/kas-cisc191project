@@ -20,8 +20,6 @@ import domain.rpg.data.traits.skills.Skill;
 
 public class Boss extends Enemy
 {
-	private int currentMP;
-	private int maxMP;
 	private Skill skill;
 	
 	/**
@@ -31,44 +29,26 @@ public class Boss extends Enemy
 	{
 		// TODO Auto-generated constructor stub
 		super(name, hp, att);
+		setMaxMP(mp);
+		setCurrentMP(mp);
 		skill = initSkill;
-		maxMP = mp;
+		setBoss(true);
 	}
 	
 	public void useSkill(Skill skill)
 	{
-		if (skill.getCost() > currentMP)
+		if (skill.getCost() > getCurrentMP())
 		{
 			//TODO not enough energy message
 		}
 		else
 		{
 			//otherwise, consume skill points
-			currentMP -= skill.getCost();
+			setCurrentMP(getCurrentMP() - skill.getCost());
 			
 			//TODO
 			//and use skill
 		}
-	}
-
-	public int getCurrentMP()
-	{
-		return currentMP;
-	}
-
-	public void setCurrentMP(int currentMP)
-	{
-		this.currentMP = currentMP;
-	}
-
-	public int getMaxMP()
-	{
-		return maxMP;
-	}
-
-	public void setMaxMP(int maxMP)
-	{
-		this.maxMP = maxMP;
 	}
 
 	public Skill getSkill()

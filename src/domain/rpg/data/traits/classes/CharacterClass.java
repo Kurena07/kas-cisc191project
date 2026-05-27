@@ -21,7 +21,7 @@ public class CharacterClass
 	private String name;
 	private int baseHP;
 	private int baseAttack;
-	private int baseStamina;
+	private int baseMP;
 	private Skill[] skills = new Skill[2];
 	
 	public enum Types {
@@ -35,12 +35,13 @@ public class CharacterClass
 	/**
 	 * 
 	 */
-	public CharacterClass(String initName, int hp, int att, int stamina)
+	public CharacterClass(String initName, int hp, int att, int mp, Skill skill1, Skill skill2)
 	{
 		name = initName;
 		baseHP = hp;
 		baseAttack = att;
-		baseStamina = stamina;
+		baseMP = mp;
+		setSkills(skill1, skill2);
 	}
 	
 	public void setSkills(Skill skill1, Skill skill2)
@@ -59,9 +60,9 @@ public class CharacterClass
 		return baseAttack;
 	}
 
-	public int getBaseStamina()
+	public int getBaseMP()
 	{
-		return baseStamina;
+		return baseMP;
 	}
 
 	public String getName()
@@ -78,6 +79,6 @@ public class CharacterClass
 	public String toString()
 	{
 		// TODO Auto-generated method stub
-		return name + " HP: " + baseHP + " Attack: " + baseAttack + " Stamina: " + baseStamina;
+		return name + " HP: " + baseHP + " Attack: " + baseAttack + " MP: " + baseMP;
 	}
 }

@@ -1,5 +1,8 @@
 package domain.rpg.data.traits.classes;
 
+import domain.rpg.data.traits.skills.Skill.Types;
+import domain.rpg.data.traits.skills.SkillFactory;
+
 /**
  * Lead Author:
  * @author Kurena Simmons
@@ -24,11 +27,13 @@ public class ClassFactory
 		{
 			//TODO
 			case WARRIOR:
-				return new CharacterClass("Warrior", 120, 15, 60);
+				return new CharacterClass("Warrior", 120, 15, 60, 
+						SkillFactory.fromType(Types.CHARGED_SLASH), 
+						SkillFactory.fromType(Types.WIDE_SLASH));
 			case MAGE:
-				return new CharacterClass("Mage", 70, 22, 100);
+				return new CharacterClass("Mage", 70, 22, 100, null, null);
 			case ROGUE: 
-				return new CharacterClass("Rogue", 90, 11, 75);
+				return new CharacterClass("Rogue", 90, 11, 75, null, null);
 			default:
 				return null;
 		}

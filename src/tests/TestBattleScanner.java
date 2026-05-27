@@ -1,34 +1,32 @@
-package domain.rpg;
+package tests;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
-import domain.rpg.actions.AttackAction;
+import org.junit.jupiter.api.Test;
+
 import domain.rpg.combat.controller.BattleController;
 import domain.rpg.combat.manager.BattleManager;
 import domain.rpg.combat.view.BattleScanner;
-import domain.rpg.combat.view.BattleView;
-import domain.rpg.data.characters.*;
 import domain.rpg.data.characters.Character;
+import domain.rpg.data.characters.Enemy;
+import domain.rpg.data.characters.Player;
 import domain.rpg.data.items.HealingPotion;
 import domain.rpg.data.items.Item;
 import domain.rpg.data.items.ManaPotion;
-import domain.rpg.data.traits.classes.CharacterClass;
 import domain.rpg.data.traits.classes.CharacterClass.Types;
-import domain.rpg.data.traits.skills.Skill;
-import domain.rpg.data.traits.skills.SkillFactory;
-import domain.rpg.story.StoryManager;
 
 /**
  * Lead Author:
  * @author Kurena Simmons
  * 
- * Date Made: May 1, 2026
- * 
- * Version/Date: May 4, 2026
+ * Version/Date: May 20, 2026
  *
- * Responsibilities of class: orchestrate the whole game 
+ * Responsibilities of class: 
  *
  */
 /**
@@ -36,21 +34,13 @@ import domain.rpg.story.StoryManager;
  * Class is
  */
 
-public class Game
+class TestBattleScanner
 {
-	private BattleManager bm;
-	private StoryManager sm;
-	private Player player;
-	private BattleScanner scan;
-	private BattleController bc;
-	
-	
-	/**
-	 * 
-	 */
-	public Game()
+
+	@Test
+	void test()
 	{
-		player = new Player();
+		Player player = new Player();
 		player.setCharClass(Types.WARRIOR);
 		ArrayList<Item> items = new ArrayList<>(List.of(
 				new HealingPotion("Potion", 10, "Heals 10 hp"),
@@ -63,24 +53,25 @@ public class Game
 				new Enemy("Slime", 70, 10), 
 				new Enemy("Slime", 70, 10)
 				));
-		bm = new BattleManager(player);
-//		bc = new BattleController(bm);
+		BattleManager bm = new BattleManager(player);
+		BattleController bc = new BattleController(bm);
 		bm.startBattle(enemies);
-//		scan = new BattleScanner(bm);
-		GameView view = new GameView();
-		BattleView battle = new BattleView(view, bm);
-//		battle.setVisible(true);
+		BattleScanner scan = new BattleScanner(bc);
+		
+		// Source - https://stackoverflow.com/a/6416179
+		// Posted by KrzyH, modified by community. See post 'Timeline' for change history
+		// Retrieved 2026-05-20, License - CC BY-SA 4.0
 
-	}
-	
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args)
-	{
-		// TODO Auto-generated method stub
-		new Game();
+		InputStream sysInBackup = System.in; // backup System.in to restore it later
+		ByteArrayInputStream in = new ByteArrayInputStream("My string".getBytes());
+		System.setIn(in);
 
+		// do your thing
+		
+		// optionally, reset System.in to its original
+		System.setIn(sysInBackup);
+		
+		
 	}
 
 }

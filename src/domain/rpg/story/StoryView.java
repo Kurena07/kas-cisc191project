@@ -1,4 +1,4 @@
-package domain.rpg.views;
+package domain.rpg.story;
 
 /**
  * Lead Author:

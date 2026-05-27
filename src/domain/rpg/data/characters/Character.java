@@ -20,13 +20,20 @@ public abstract class Character
 	private int currentHP;
 	private int maxHP;
 	private int attack;
+	private int currentMP;
+	private int maxMP;
 	
 	/**
 	 * 
 	 */
-	public Character()
+	public Character(String name, int hp, int attack, int mp)
 	{
-		// TODO Auto-generated constructor stub
+		this.name = name;
+		this.maxHP = hp;	
+		this.currentHP = hp;
+		this.attack = attack;
+		this.maxMP = mp;
+		this.currentMP = mp;
 	}
 	
 	public int takeDamage(int damage)
@@ -84,6 +91,26 @@ public abstract class Character
 	public void setAttack(int attack)
 	{
 		this.attack = attack;
+	}
+
+	public int getCurrentMP()
+	{
+		return currentMP;
+	}
+
+	public void setCurrentMP(int currentMP)
+	{
+		this.currentMP = currentMP;
+	}
+
+	public int getMaxMP()
+	{
+		return maxMP;
+	}
+
+	public void setMaxMP(int maxMP)
+	{
+		this.maxMP = maxMP;
 	}
 	
 	
