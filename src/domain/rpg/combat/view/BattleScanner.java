@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 import domain.rpg.combat.controller.BattleController;
 import domain.rpg.combat.manager.BattleManager;
+import domain.rpg.data.characters.Boss;
 import domain.rpg.data.characters.Character;
 import domain.rpg.data.characters.Enemy;
 import domain.rpg.data.items.Item;
@@ -40,33 +41,58 @@ public class BattleScanner
 		input = new Scanner(System.in);
 		c = new BattleController(manage);
 		scannerOpen = true;
-		while (scannerOpen)
+		try 
 		{
-			battleStats();
-			
-			while (c.currentTurn().equals(c.getPlayer()))
+			while (scannerOpen)
 			{
-				playerTurn();
-			}
-			while (!c.currentTurn().equals(c.getPlayer()))
+				battleStats();
+				
+				while (c.currentTurn().equals(c.getPlayer()))
 				{
-					c.enemyTurn(c.currentTurn());
-				}	
-			
-			if (c.getManager().hasBattleEnded())
-			{
-				if (c.getManager().hasPlayerWon())
-				{
-					System.out.println("You win!");
+					playerTurn();
 				}
-				else
+				if (c.isBossFight())
 				{
-					System.out.println("Game Over. You Died");
+					while (!c.currentTurn().equals(c.getPlayer()))
+					{
+						c.bossTurn((Boss) c.currentTurn());
+						System.out.println(c.getMessage());
+					}
 				}
-				scannerOpen = false;
+				else 
+				{
+					while (!c.currentTurn().equals(c.getPlayer()))
+					{
+						c.enemyTurn(c.currentTurn());
+						if (!c.getEnemies().isEmpty())
+						{
+							System.out.println(c.getMessage());
+						}
+					}	
+				}
+				
+				if (c.getManager().hasBattleEnded())
+				{
+					if (c.getManager().hasPlayerWon())
+					{
+						System.out.println("You win!");
+					}
+					else
+					{
+						System.out.println("Game Over. You Died");
+					}
+					scannerOpen = false;
+				}
 			}
 		}
-		input.close();
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			input.close();
+		}
 	}
 	
 	public void playerTurn()
@@ -146,6 +172,7 @@ public class BattleScanner
 			System.out.println("Invalid input");
 			playerTurn();
 		}
+		System.out.println(c.getMessage());
 	}
 	
 	public ArrayList<Character> selectTarget()

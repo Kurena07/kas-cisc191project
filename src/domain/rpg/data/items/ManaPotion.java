@@ -36,12 +36,12 @@ public class ManaPotion extends Item
 		if (recover > target.getMaxMP())
 		{
 			target.setCurrentMP(target.getMaxMP());
-			System.out.println(getName() + " recovered mana. Mana is full now");
+			setMessage("recovered all mana.");
 		}
 		else
 		{
 			target.setCurrentMP(target.getCurrentMP() + getAmount());			
-			System.out.println(getName() + " recovered " + getAmount() + " mana");
+			setMessage("recovered " + getAmount() + " mana");
 		}
 	}
 

@@ -49,19 +49,21 @@ public class ItemAction extends Action
 		{
 			//TODO no items message
 			setActionComplete(false);
-			System.out.println("Your inventory is empty!");
+			setMessage("Your inventory is empty!");
 		}
 		else if (!p.getInventory().contains(item))
 		{
 			//TODO doesnt contain this item message
 			setActionComplete(false);
-			System.out.println("You don't have this item!");
+			setMessage("You don't have this item!");
 		}
 		else
 		{
 			item.useItem(p);
 			p.getInventory().remove(item);
 			setActionComplete(true);
+			setMessage("You used a " + item.getName() + ". You " + item.getMessage());
 		}
 	}
+	
 }

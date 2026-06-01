@@ -24,6 +24,7 @@ public abstract class Item
 	private String description;
 	private int effectAmount;
 	private final String type;
+	private String message;
 	
 	/**
 	 * 
@@ -38,11 +39,6 @@ public abstract class Item
 	
 	public abstract void useItem(Character target);
 	
-	@Override
-	public String toString()
-	{
-		return name + " (" + description + ")";
-	}
 	
 	/**
 	 * @return the name
@@ -72,6 +68,20 @@ public abstract class Item
 	{
 		return type;
 	}
-
 	
+	public void setMessage(String text)
+	{
+		message = text;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return name + " (" + description + ")";
+	}
+	
+	public String getMessage()
+	{
+		return message;
+	}
 }

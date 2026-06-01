@@ -37,12 +37,13 @@ public class HealingPotion extends Item
 		if (recover > target.getMaxHP())
 		{
 			target.setCurrentHP(target.getMaxHP());
-			System.out.println(getName() + " healed hp");
+			setMessage("recovered full health.");
 		}
 		else
 		{
 			target.setCurrentHP(target.getCurrentHP() + getAmount());			
-			System.out.println(getName() + " recovered " + getAmount() + " health");
+			setMessage("recovered " + getAmount() + " health.");
 		}
 	}	
+	
 }

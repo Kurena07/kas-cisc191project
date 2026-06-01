@@ -2,6 +2,11 @@ package domain.rpg.combat.view.panels;
 
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+
+import domain.rpg.combat.controller.BattleController;
+import domain.rpg.combat.view.components.EnemySpriteComponent;
+import domain.rpg.combat.view.main.BattleView;
+import domain.rpg.combat.view.main.CombatPanels;
 import domain.rpg.data.characters.Character;
 import domain.rpg.data.traits.classes.CharacterClass;
 import domain.rpg.data.traits.skills.SkillFactory;
@@ -32,15 +37,12 @@ public class TargetPanel extends JPanel {
     private JButton backButton;
     private Character selectedTarget;
     private Runnable onTargetChanged;
-    private Type actionType;
-    
-    enum Type
-    {
-    	ATTACK, 
-    	SKILL
-    }
+    private BattleController bc;
+    private CombatPanels view;
 
-    public TargetPanel() {
+    public TargetPanel(BattleController controller, CombatPanels view) {
+    	bc = controller;
+    	this.view = view;
         setBackground(Color.BLACK);
         setPreferredSize(new Dimension(0, 160));
         setLayout(new GridBagLayout());
@@ -155,6 +157,7 @@ public class TargetPanel extends JPanel {
         gbc.insets = new Insets(3, 0, 5, 5);
         gbc.ipadx = 180;
         add(backButton, gbc);
+        
     }
 
     // --- Public methods ---
@@ -188,6 +191,19 @@ public class TargetPanel extends JPanel {
         targetListPanel.revalidate();
         targetListPanel.repaint();
     }
+    
+    public void clearSelectedTarget()
+    {
+        selectedTarget = null;
+        selectButton.setEnabled(false);
+        targetListPanel.revalidate();
+        targetListPanel.repaint();
+    }
+    
+    public void removeTarget()
+    {
+    	
+    }
 
     public void setOnTargetChanged(Runnable callback) {
         this.onTargetChanged = callback;
@@ -201,9 +217,14 @@ public class TargetPanel extends JPanel {
         return backButton;
     }
 
-    public Character getSelectedTargetName() {
+    public Character getSelectedTarget() {
         return selectedTarget;
     }
+    
+	public void setSelectedTarget(Character selectedTarget)
+	{
+		this.selectedTarget = selectedTarget;
+	}
 
     // --- Helpers ---
 
@@ -221,31 +242,14 @@ public class TargetPanel extends JPanel {
 
         btn.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
-                if (!btn.isContentAreaFilled() || btn.getBackground().equals(Color.BLACK)) {
-                    btn.setContentAreaFilled(true);
-                    btn.setBackground(new Color(50, 50, 50));
-                }
+                btn.setContentAreaFilled(true);
+                btn.setBackground(new Color(40, 40, 40));
             }
             public void mouseExited(MouseEvent e) {
-                if (btn.getText() != null && !btn.getText().equals(selectedTarget.getName())) {
-                    btn.setContentAreaFilled(false);
-                }
+                btn.setContentAreaFilled(false);
             }
         });
 
         return btn;
     }
-
-	public Type getActionType()
-	{
-		return actionType;
-	}
-
-	public void setActionType(Type action)
-	{
-		this.actionType = action;
-	}
-    
-    
-    
 }

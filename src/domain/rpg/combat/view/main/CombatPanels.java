@@ -1,8 +1,8 @@
-package domain.rpg.combat.view;
+package domain.rpg.combat.view.main;
 
-import java.awt.GridLayout;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import javax.swing.*;
 
@@ -15,6 +15,8 @@ import domain.rpg.combat.view.panels.ItemPanel;
 import domain.rpg.combat.view.panels.SkillPanel;
 import domain.rpg.combat.view.panels.TargetPanel;
 import domain.rpg.data.characters.Enemy;
+import domain.rpg.data.characters.Boss;
+import domain.rpg.data.characters.Character;
 
 /**
  * Lead Author:
@@ -53,7 +55,7 @@ import java.awt.*;
  * Class is
  */
 
-public class BattleView 
+public class CombatPanels 
 {
 
     private GameView gameView;
@@ -61,6 +63,7 @@ public class BattleView
 
     // Top panel components
     private JPanel enemySpritePanel;
+    private java.util.HashMap<Enemy, EnemySpriteComponent> enemySpriteMap = new java.util.HashMap<>();
     private JPanel playerStatsBar;
     private SelectionArrow selectionArrow;
 
@@ -71,7 +74,12 @@ public class BattleView
     private SkillPanel skillPanel;
     private ItemPanel itemPanel;
     private TargetPanel targetPanel;
+    private String turnText;
+	private JPanel endPanel;
+	private JButton endButton;
 
+    private String selectedAction;
+    
     // Player stats labels
     private JLabel playerNameLabel;
     private JLabel playerLevelLabel;
@@ -80,7 +88,7 @@ public class BattleView
     private JLabel playerMpLabel;
     private JProgressBar mpBar;
 
-    public BattleView(GameView gameView, BattleManager manage) {
+    public CombatPanels(GameView gameView, BattleManager manage) {
         this.gameView = gameView;
         bc = new BattleController(manage);
         buildTopPanel();
@@ -94,14 +102,35 @@ public class BattleView
         // --- Enemy sprite area ---
         enemySpritePanel = new JPanel();
         enemySpritePanel.setBackground(Color.BLACK);
-        enemySpritePanel.setLayout(new BorderLayout());
-        
-        //add selection arrow
+        // Top padding of 25px leaves room for the selection arrow above sprites
+        enemySpritePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 30, 25));
+
+        // Use a JLayeredPane so the arrow floats above the sprites
+        // without being affected by FlowLayout
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setBackground(Color.BLACK);
+        layeredPane.setOpaque(true);
+        // null layout — we manually size the sprite panel to fill, arrow is absolute
+        layeredPane.setLayout(null);
+
+        // enemySpritePanel fills the entire layered pane
+        layeredPane.add(enemySpritePanel, JLayeredPane.DEFAULT_LAYER);
+
+        // Selection arrow floats on top, positioned absolutely by pointAt()
         selectionArrow = new SelectionArrow();
-        enemySpritePanel.add(selectionArrow);
         selectionArrow.setVisible(false);
-        
-        topPanel.add(enemySpritePanel, BorderLayout.CENTER);
+        layeredPane.add(selectionArrow, JLayeredPane.PALETTE_LAYER);
+
+        // Keep enemySpritePanel sized to fill the layered pane
+        layeredPane.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                enemySpritePanel.setBounds(0, 0, layeredPane.getWidth(), layeredPane.getHeight());
+                enemySpritePanel.revalidate();
+            }
+        });
+
+        topPanel.add(layeredPane, BorderLayout.CENTER);
 
         // --- Player stats bar spanning the bottom of the top panel ---
         playerStatsBar = new JPanel();
@@ -118,7 +147,7 @@ public class BattleView
         gbc.insets = new Insets(4, 15, 4, 15);
 
         // Name
-        playerNameLabel = new JLabel("Hero");
+        playerNameLabel = new JLabel("Player");
         playerNameLabel.setForeground(Color.WHITE);
         playerNameLabel.setFont(new Font("Monospaced", Font.BOLD, 15));
         gbc.gridx = 0;
@@ -129,7 +158,7 @@ public class BattleView
         playerStatsBar.add(createSeparator(), separatorConstraints(1));
 
         // Level
-        playerLevelLabel = new JLabel("Lv. 12");
+        playerLevelLabel = new JLabel("1");
         playerLevelLabel.setForeground(Color.WHITE);
         playerLevelLabel.setFont(new Font("Monospaced", Font.BOLD, 15));
         gbc.gridx = 2;
@@ -163,7 +192,7 @@ public class BattleView
         playerStatsBar.add(hpBar, gbc);
 
         // HP text
-        playerHpLabel = new JLabel("100 / 100");
+        playerHpLabel = new JLabel("100/100");
         playerHpLabel.setForeground(new Color(200, 200, 200));
         playerHpLabel.setFont(new Font("Monospaced", Font.PLAIN, 11));
         gbc.gridx = 6;
@@ -184,8 +213,8 @@ public class BattleView
         playerStatsBar.add(mpLabel, gbc);
 
         // MP bar
-        mpBar = new JProgressBar(0, 60);
-        mpBar.setValue(60);
+        mpBar = new JProgressBar(0, 50);
+        mpBar.setValue(50);
         mpBar.setStringPainted(false);
         mpBar.setPreferredSize(new Dimension(120, 12));
         mpBar.setBackground(new Color(50, 50, 50));
@@ -197,7 +226,7 @@ public class BattleView
         playerStatsBar.add(mpBar, gbc);
 
         // MP text
-        playerMpLabel = new JLabel("60 / 60");
+        playerMpLabel = new JLabel("50/50");
         playerMpLabel.setForeground(new Color(200, 200, 200));
         playerMpLabel.setFont(new Font("Monospaced", Font.PLAIN, 11));
         gbc.gridx = 10;
@@ -215,22 +244,31 @@ public class BattleView
         cardPanel.setBackground(Color.BLACK);
  
         buildActionButtons();
-        skillPanel = new SkillPanel();
-        itemPanel = new ItemPanel();
-        targetPanel = new TargetPanel();
-        skillPanel.getBackButton().addActionListener(e -> cardLayout.show(cardPanel, "actions"));
-        itemPanel.getBackButton().addActionListener(e -> cardLayout.show(cardPanel, "actions"));
-        targetPanel.getBackButton().addActionListener(e -> 
-        {
-        	selectionArrow.setVisible(false);
-        	cardLayout.show(cardPanel, "actions");
-        
+        buildEndPanel();
+        skillPanel = new SkillPanel(bc, this);
+        itemPanel = new ItemPanel(bc);
+        targetPanel = new TargetPanel(bc, this);
+        		
+        targetPanel.setOnTargetChanged(() -> {
+            Enemy target = (Enemy) targetPanel.getSelectedTarget();
+            EnemySpriteComponent sprite = getEnemySpriteMap().get(target);
+            if (sprite != null) {
+                // Convert sprite coordinates from enemySpritePanel space to layeredPane space
+                Point spritePos = SwingUtilities.convertPoint(
+                    enemySpritePanel, 
+                    sprite.getCenterX(), 
+                    sprite.getTopY(), 
+                    selectionArrow.getParent()
+                );
+                selectionArrow.pointAt(spritePos.x, spritePos.y);
+            }
         });
- 
+
         cardPanel.add(actionButtonPanel, "actions");
         cardPanel.add(skillPanel, "skills");
         cardPanel.add(itemPanel, "items");
         cardPanel.add(targetPanel, "target");
+        cardPanel.add(endPanel, "end");
  
         cardLayout.show(cardPanel, "actions");
  
@@ -248,27 +286,74 @@ public class BattleView
         ));
  
         JButton attackBtn = createActionButton("Attack");
-        attackBtn.addActionListener(e -> 
+        attackBtn.addActionListener(e -> //replace with ButtonActionListener
         {
         	if (bc.getEnemies().size() > 1)
         	{
-        		bc.useAttack(bc.getPlayer(), bc.selectTarget(-1));
+        		setSelectedAction("Attack");
+        		showTargetPanel();
         	}
         	else 
         	{
         		bc.useAttack(bc.getPlayer(), bc.getEnemies());
+        		turnText += bc.getMessage() + "\n";
+        		enemyAction();
+        		updateUI();
+        		checkBattleEnd();
         	}
         });
         actionButtonPanel.add(attackBtn);
  
         JButton skillBtn = createActionButton("Skill");
-        skillBtn.addActionListener(e -> showSkillPanel());
+        skillBtn.addActionListener(e -> 
+        {
+        	setSelectedAction("Skill");
+        	showSkillPanel();
+        });
         actionButtonPanel.add(skillBtn);
  
         JButton itemBtn = createActionButton("Item");
         itemBtn.addActionListener(e -> showItemPanel());
         actionButtonPanel.add(itemBtn);
     }
+    
+	private void buildEndPanel()
+	{
+		endPanel = new JPanel(new GridBagLayout());
+		endPanel.setBackground(Color.BLACK);
+		
+		endButton = new JButton() {
+			@Override
+			protected void paintComponent(Graphics g) {
+				Graphics2D g2 = (Graphics2D) g.create();
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				
+				g2.setColor(Color.BLACK);
+				g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+				
+				g2.setColor(new Color(255, 255, 255, 170));
+				g2.setStroke(new BasicStroke(1.5f));
+				g2.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, 8, 8);
+				
+				g2.setColor(Color.WHITE);
+				g2.setFont(new Font("Monospaced", Font.BOLD, 18));
+				FontMetrics fm = g2.getFontMetrics();
+				String text = getText();
+				int textX = (getWidth() - fm.stringWidth(text)) / 2;
+				int textY = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
+				g2.drawString(text, textX, textY);
+				
+				g2.dispose();
+			}
+		};
+		endButton.setContentAreaFilled(false);
+		endButton.setBorderPainted(false);
+		endButton.setFocusPainted(false);
+		endButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		endButton.setPreferredSize(new Dimension(300, 80));
+		
+		endPanel.add(endButton);
+	}
     
     public void showActionButtons() {
         cardLayout.show(cardPanel, "actions");
@@ -284,6 +369,11 @@ public class BattleView
     
     public void showTargetPanel() {
         cardLayout.show(cardPanel, "target");
+    }
+    
+    public void showEndPanel()
+    {
+    	cardLayout.show(cardPanel, "end");
     }
 
     private JButton createActionButton(String name) {
@@ -330,11 +420,11 @@ public class BattleView
         return sep;
     }
     
-    public EnemySpriteComponent addEnemy(Enemy e, int x, int y) {
-        EnemySpriteComponent enemy = new EnemySpriteComponent(e.getSprite(), e.getName(),
-        		e.getCurrentHP(), e.getMaxHP());
-        enemy.setLocation(x, y);
+    public EnemySpriteComponent addEnemy(Enemy e) {
+        EnemySpriteComponent enemy = new EnemySpriteComponent(e);
         enemySpritePanel.add(enemy);
+        enemySpriteMap.put(e, enemy);
+        enemySpritePanel.revalidate();
         enemySpritePanel.repaint();
         return enemy;
     }
@@ -347,41 +437,92 @@ public class BattleView
         return gbc;
     }
     
-    // 
+    public void enemyAction()
+    {
+		if (bc.isBossFight())
+		{
+			while (!bc.currentTurn().equals(bc.getPlayer()))
+			{
+				bc.bossTurn((Boss) bc.currentTurn());
+				turnText += bc.getMessage() + "\n";
+			}
+		}
+		else 
+		{
+			while (!bc.currentTurn().equals(bc.getPlayer()))
+			{
+				bc.enemyTurn(bc.currentTurn());
+				if (!bc.getEnemies().isEmpty())
+				{
+					turnText += bc.getMessage() + "\n";
+				}
+			}	
+		}
+    }
+    
+	public void checkBattleEnd()
+	{
+		if (bc.getManager().hasBattleEnded())
+		{
+			if (getBc().getManager().hasPlayerWon())
+			{
+				addToTurnText("You win!");
+				endButton.setText("Continue");
+			}
+			else
+			{
+				addToTurnText("You were defeated...");
+				endButton.setText("Exit");
+			}
+			updateUI();
+			showEndPanel();
+		}
+	}
+    
+//    public void 
+  
+    // ui update methods
 
-    // --- Public getters/setters ---
-
-    public JPanel getEnemySpritePanel() {
-        return enemySpritePanel;
+    public void updatePlayerName() {
+        playerNameLabel.setText(bc.getPlayer().getName());
     }
 
-    public void setPlayerName(String name) {
-        playerNameLabel.setText(name);
+    public void updatePlayerLevel() {
+        playerLevelLabel.setText("Lv. " + bc.getPlayer().getLevel());
     }
 
-    public void setPlayerLevel(int level) {
-        playerLevelLabel.setText("Lv. " + level);
+    public void updatePlayerHp() {
+    	int currentHP = bc.getPlayer().getCurrentHP();
+        int maxHP = bc.getPlayer().getMaxHP();
+        hpBar.setMaximum(maxHP);
+        hpBar.setValue(currentHP);
+        playerHpLabel.setText(currentHP + " / " + maxHP);
     }
 
-    public void setPlayerHp(int current, int max) {
-        hpBar.setMaximum(max);
-        hpBar.setValue(current);
-        playerHpLabel.setText(current + " / " + max);
-    }
-
-    public void setPlayerMp(int current, int max) {
-        mpBar.setMaximum(max);
-        mpBar.setValue(current);
-        playerMpLabel.setText(current + " / " + max);
-    }
-
-    public JPanel getActionButtonPanel() {
-        return actionButtonPanel;
+    public void updatePlayerMp() {
+    	int currentMP = bc.getPlayer().getCurrentMP();
+        int maxMP = bc.getPlayer().getMaxMP();
+        mpBar.setMaximum(maxMP);
+        mpBar.setValue(currentMP);
+        playerMpLabel.setText(currentMP + " / " + maxMP);
     }
     
     public void updateUI()
     {
-    	
+    	showActionButtons();
+    	updatePlayerHp();
+    	updatePlayerMp();
+    	for (java.util.Map.Entry<Enemy, EnemySpriteComponent> entry : enemySpriteMap.entrySet()) {
+    	    Enemy enemy = entry.getKey();
+    	    EnemySpriteComponent sprite = entry.getValue();
+    	    sprite.setHp(enemy.getCurrentHP());
+    	}
+    	targetPanel.clearSelectedTarget();
+    	skillPanel.clearSkillDesc();
+    	itemPanel.clearItemDesc();
+    	selectionArrow.setVisible(false);
+    	gameView.getTextBox().setText(turnText);
+		turnText = "";
     }
 	
 	public void setVisible(boolean visible) {
@@ -393,4 +534,203 @@ public class BattleView
         gameView.getTopPanel().revalidate();
         gameView.getTopPanel().repaint();
     }
+	
+	// --- Public getters/setters ---
+	
+	public JPanel getEnemySpritePanel() {
+		return enemySpritePanel;
+	}
+	
+	public JPanel getActionButtonPanel() {
+		return actionButtonPanel;
+	}
+
+	public GameView getGameView()
+	{
+		return gameView;
+	}
+
+	public void setGameView(GameView gameView)
+	{
+		this.gameView = gameView;
+	}
+
+	public BattleController getBc()
+	{
+		return bc;
+	}
+
+	public void setBc(BattleController bc)
+	{
+		this.bc = bc;
+	}
+
+	public JPanel getPlayerStatsBar()
+	{
+		return playerStatsBar;
+	}
+
+	public void setPlayerStatsBar(JPanel playerStatsBar)
+	{
+		this.playerStatsBar = playerStatsBar;
+	}
+
+	public SelectionArrow getSelectionArrow()
+	{
+		return selectionArrow;
+	}
+
+	public void setSelectionArrow(SelectionArrow selectionArrow)
+	{
+		this.selectionArrow = selectionArrow;
+	}
+
+	public JPanel getCardPanel()
+	{
+		return cardPanel;
+	}
+
+	public void setCardPanel(JPanel cardPanel)
+	{
+		this.cardPanel = cardPanel;
+	}
+
+	public CardLayout getCardLayout()
+	{
+		return cardLayout;
+	}
+
+	public void setCardLayout(CardLayout cardLayout)
+	{
+		this.cardLayout = cardLayout;
+	}
+
+	public SkillPanel getSkillPanel()
+	{
+		return skillPanel;
+	}
+
+	public void setSkillPanel(SkillPanel skillPanel)
+	{
+		this.skillPanel = skillPanel;
+	}
+
+	public ItemPanel getItemPanel()
+	{
+		return itemPanel;
+	}
+
+	public void setItemPanel(ItemPanel itemPanel)
+	{
+		this.itemPanel = itemPanel;
+	}
+
+	public TargetPanel getTargetPanel()
+	{
+		return targetPanel;
+	}
+
+	public void setTargetPanel(TargetPanel targetPanel)
+	{
+		this.targetPanel = targetPanel;
+	}
+
+	public String getSelectedAction()
+	{
+		return selectedAction;
+	}
+
+	public JLabel getPlayerNameLabel()
+	{
+		return playerNameLabel;
+	}
+
+	public void setPlayerNameLabel(JLabel playerNameLabel)
+	{
+		this.playerNameLabel = playerNameLabel;
+	}
+
+	public JLabel getPlayerLevelLabel()
+	{
+		return playerLevelLabel;
+	}
+
+	public void setPlayerLevelLabel(JLabel playerLevelLabel)
+	{
+		this.playerLevelLabel = playerLevelLabel;
+	}
+
+	public JLabel getPlayerHpLabel()
+	{
+		return playerHpLabel;
+	}
+
+	public void setPlayerHpLabel(JLabel playerHpLabel)
+	{
+		this.playerHpLabel = playerHpLabel;
+	}
+
+	public JProgressBar getHpBar()
+	{
+		return hpBar;
+	}
+
+	public void setHpBar(JProgressBar hpBar)
+	{
+		this.hpBar = hpBar;
+	}
+
+	public JLabel getPlayerMpLabel()
+	{
+		return playerMpLabel;
+	}
+
+	public void setPlayerMpLabel(JLabel playerMpLabel)
+	{
+		this.playerMpLabel = playerMpLabel;
+	}
+
+	public JProgressBar getMpBar()
+	{
+		return mpBar;
+	}
+
+	public void setMpBar(JProgressBar mpBar)
+	{
+		this.mpBar = mpBar;
+	}
+
+	public void setEnemySpritePanel(JPanel enemySpritePanel)
+	{
+		this.enemySpritePanel = enemySpritePanel;
+	}
+
+	public void setActionButtonPanel(JPanel actionButtonPanel)
+	{
+		this.actionButtonPanel = actionButtonPanel;
+	}
+	
+	public java.util.HashMap<Enemy, EnemySpriteComponent> getEnemySpriteMap() {
+	    return enemySpriteMap;
+	}
+
+	public String getTurnText()
+	{
+		return turnText;
+	}
+
+	public void addToTurnText(String text)
+	{
+		turnText += text + "\n";
+	}
+
+	public void setSelectedAction(String selectedAction)
+	{
+		this.selectedAction = selectedAction;
+	}
+	
+	public JButton getEndButton()
+	{
+		return endButton;
+	}
 }

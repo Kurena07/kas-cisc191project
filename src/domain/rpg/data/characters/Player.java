@@ -38,7 +38,7 @@ public class Player extends Character
 		//TODO
 		super("Player", 100, 10, 50);
 		level = 1;
-		
+		setIsBoss(false);
 	}
 	
 	public void setStats(int hp, int att, int mp)

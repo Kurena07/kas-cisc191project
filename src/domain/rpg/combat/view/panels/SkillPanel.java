@@ -5,6 +5,8 @@ import java.awt.LayoutManager;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+import domain.rpg.combat.controller.BattleController;
+import domain.rpg.combat.view.main.CombatPanels;
 import domain.rpg.data.traits.skills.Skill;
 
 /**
@@ -37,9 +39,11 @@ public class SkillPanel extends JPanel {
     private JLabel skillMpCostLabel;
     private JButton skillUseButton;
     private JButton backButton;
-    private String selectedSkillName;
+    private Skill selectedSkill;
+    private BattleController bc;
 
-    public SkillPanel() {
+    public SkillPanel(BattleController control, CombatPanels combat) {
+    	bc = control;
         setBackground(Color.BLACK);
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         setPreferredSize(new Dimension(0, 160));
@@ -155,7 +159,7 @@ public class SkillPanel extends JPanel {
     public void addSkill(Skill skill) {
         JButton btn = createListButton(skill.getName());
         btn.addActionListener(e -> {
-            selectedSkillName = skill.getName();
+        	selectedSkill = skill;
             skillNameLabel.setText(skill.getName());
             skillDescArea.setText(skill.getDescription());
             skillMpCostLabel.setText("MP Cost: " + skill.getCost());
@@ -171,7 +175,18 @@ public class SkillPanel extends JPanel {
         skillDescArea.setText(" ");
         skillMpCostLabel.setText(" ");
         skillUseButton.setEnabled(false);
-        selectedSkillName = null;
+        selectedSkill = null;
+        skillListPanel.revalidate();
+        skillListPanel.repaint();
+    }
+    
+    public void clearSkillDesc()
+    {
+        skillNameLabel.setText(" ");
+        skillDescArea.setText(" ");
+        skillMpCostLabel.setText(" ");
+        skillUseButton.setEnabled(false);
+        selectedSkill = null;
         skillListPanel.revalidate();
         skillListPanel.repaint();
     }
@@ -182,10 +197,6 @@ public class SkillPanel extends JPanel {
 
     public JButton getBackButton() {
         return backButton;
-    }
-
-    public String getSelectedSkillName() {
-        return selectedSkillName;
     }
 
     // --- Helpers ---
@@ -236,4 +247,9 @@ public class SkillPanel extends JPanel {
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setPreferredSize(new Dimension(60, 28));
     }
+
+	public Skill getSelectedSkill()
+	{
+		return selectedSkill;
+	}
 }

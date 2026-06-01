@@ -22,6 +22,7 @@ public abstract class Character
 	private int attack;
 	private int currentMP;
 	private int maxMP;
+	private Boolean isBoss;
 	
 	/**
 	 * 
@@ -111,6 +112,16 @@ public abstract class Character
 	public void setMaxMP(int maxMP)
 	{
 		this.maxMP = maxMP;
+	}
+
+	public Boolean getIsBoss()
+	{
+		return isBoss;
+	}
+
+	public void setIsBoss(Boolean isBoss)
+	{
+		this.isBoss = isBoss;
 	}
 	
 	

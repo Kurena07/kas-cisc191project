@@ -39,18 +39,14 @@ public class SkillAction extends Action
 		if (skill.getCost() > user.getCurrentMP())
 		{
 			setActionComplete(false);
-			System.out.println("You don't have enough skill points!");			
+			setMessage("You don't have enough skill points!");			
 		}
 		else
 		{
 			skill.useSkill(user, targets);
 			setActionComplete(true);
-			System.out.println(toString(user, skill));
+			setMessage(user.getName() + " used " + skill.getName() + ". \n" + skill.getMessage());
 		}
 	}
-	
-	public String toString(Character user, Skill skill)
-	{
-		return user.getName() + " used " + skill.getName();
-	}
+
 }

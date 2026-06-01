@@ -16,6 +16,8 @@ package domain.rpg.combat.view.components;
 
 import javax.swing.*;
 import java.awt.*;
+import domain.rpg.data.characters.Character;
+import domain.rpg.data.characters.Enemy;
 
 /**
  * A visual component that displays an enemy's sprite, name, and HP bar.
@@ -31,7 +33,9 @@ public class EnemySpriteComponent extends JPanel {
     private JLabel spriteLabel;
     private JLabel nameLabel;
     private JProgressBar hpBar;
+    private JLabel hpLabel;
     private int maxHp;
+    private Enemy enemy;
 
     /**
      * @param sprite  The enemy's sprite image
@@ -39,22 +43,23 @@ public class EnemySpriteComponent extends JPanel {
      * @param currentHp Current HP
      * @param maxHp     Maximum HP
      */
-    public EnemySpriteComponent(ImageIcon sprite, String name, int currentHp, int maxHp) {
-        this.maxHp = maxHp;
+    public EnemySpriteComponent(Enemy enemy) {
+        this.maxHp = enemy.getMaxHP();
+        this.enemy = enemy;
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(new Color(0, 0, 0, 0)); // transparent
         setOpaque(false);
 
         // --- Sprite ---
-        spriteLabel = new JLabel(sprite);
+        spriteLabel = new JLabel(enemy.getSprite());
         spriteLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(spriteLabel);
 
         add(Box.createVerticalStrut(4));
 
         // --- Name ---
-        nameLabel = new JLabel(name);
+        nameLabel = new JLabel(enemy.getName());
         nameLabel.setForeground(Color.WHITE);
         nameLabel.setFont(new Font("Monospaced", Font.PLAIN, 11));
         nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -62,28 +67,55 @@ public class EnemySpriteComponent extends JPanel {
 
         add(Box.createVerticalStrut(2));
 
-        // --- HP bar ---
+        // --- HP bar + label row (centered) ---
+        JPanel hpRow = new JPanel();
+        hpRow.setLayout(new BoxLayout(hpRow, BoxLayout.X_AXIS));
+        hpRow.setBackground(new Color(0, 0, 0, 0));
+        hpRow.setOpaque(false);
+        hpRow.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         hpBar = new JProgressBar(0, maxHp);
-        hpBar.setValue(currentHp);
+        hpBar.setValue(enemy.getCurrentHP());
         hpBar.setStringPainted(false);
         hpBar.setBackground(new Color(50, 50, 50));
         hpBar.setForeground(Color.WHITE);
         hpBar.setBorderPainted(true);
         hpBar.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
-        hpBar.setMaximumSize(new Dimension(sprite.getIconWidth(), 8));
-        hpBar.setPreferredSize(new Dimension(sprite.getIconWidth(), 8));
-        hpBar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        add(hpBar);
+        int barWidth = Math.max(enemy.getSprite().getIconWidth() - 20, 60);
+        hpBar.setMaximumSize(new Dimension(barWidth, 8));
+        hpBar.setPreferredSize(new Dimension(barWidth, 8));
+        hpRow.add(hpBar);
 
-        // Size the whole component to fit
-        int width = Math.max(sprite.getIconWidth(), 80);
-        int height = sprite.getIconHeight() + 30; // sprite + name + bar + spacing
-        setSize(width, height);
+        hpRow.add(Box.createHorizontalStrut(4));
+
+        hpLabel = new JLabel(enemy.getCurrentHP() + "/" + maxHp);
+        hpLabel.setForeground(new Color(200, 200, 200));
+        hpLabel.setFont(new Font("Monospaced", Font.PLAIN, 9));
+        hpRow.add(hpLabel);
+
+        add(hpRow);
+
+        // Size: wide enough for sprite or hp row, tall enough for everything
+        int hpRowWidth = barWidth + 4 + hpLabel.getPreferredSize().width;
+        int width = Math.max(Math.max(enemy.getSprite().getIconWidth(), hpRowWidth), 80);
+        int height = enemy.getSprite().getIconHeight() + 36; // sprite + name + hp row + gaps
+        Dimension size = new Dimension(width, height);
+        setSize(size);
+        setPreferredSize(size);
+        setMinimumSize(size);
+        setMaximumSize(size);
+        revalidate();
+    }
+    
+    public void update()
+    {
+    	setHp(enemy.getCurrentHP());
     }
 
     /** Update the HP bar. */
     public void setHp(int currentHp) {
         hpBar.setValue(currentHp);
+        hpLabel.setText(currentHp + "/" + maxHp);
     }
 
     /** Update max HP and current HP. */
@@ -91,6 +123,7 @@ public class EnemySpriteComponent extends JPanel {
         this.maxHp = newMaxHp;
         hpBar.setMaximum(newMaxHp);
         hpBar.setValue(currentHp);
+        hpLabel.setText(currentHp + "/" + newMaxHp);
     }
 
     /** Update the name label. */
@@ -112,4 +145,9 @@ public class EnemySpriteComponent extends JPanel {
     public int getTopY() {
         return getY();
     }
+
+	public Enemy getEnemy()
+	{
+		return enemy;
+	}
 }

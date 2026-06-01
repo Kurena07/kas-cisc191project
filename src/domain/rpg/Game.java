@@ -8,7 +8,8 @@ import domain.rpg.actions.AttackAction;
 import domain.rpg.combat.controller.BattleController;
 import domain.rpg.combat.manager.BattleManager;
 import domain.rpg.combat.view.BattleScanner;
-import domain.rpg.combat.view.BattleView;
+import domain.rpg.combat.view.main.BattleView;
+import domain.rpg.combat.view.main.CombatPanels;
 import domain.rpg.data.characters.*;
 import domain.rpg.data.characters.Character;
 import domain.rpg.data.items.HealingPotion;
@@ -51,6 +52,7 @@ public class Game
 	public Game()
 	{
 		player = new Player();
+		player.setName("Player");
 		player.setCharClass(Types.WARRIOR);
 		ArrayList<Item> items = new ArrayList<>(List.of(
 				new HealingPotion("Potion", 10, "Heals 10 hp"),
@@ -60,16 +62,21 @@ public class Game
 				));
 		player.setInventory(items);
 		ArrayList<Character> enemies = new ArrayList<>(List.of(
-				new Enemy("Slime", 70, 10), 
-				new Enemy("Slime", 70, 10)
+				new Enemy("Slime", 70, 10, "/domain/rpg/images/Slime.png"), 
+				new Enemy("Slime", 70, 10, "/domain/rpg/images/Slime.png")
 				));
+		ArrayList<Character> enemy = new ArrayList<>(List.of(
+				new Enemy("Slime", 70, 10, "/domain/rpg/images/Slime.png")
+				));
+		ArrayList<Character> boss = new ArrayList<>(List.of(
+				new Boss("Boss Slime", 200, 20, 50, SkillFactory.fromType(Skill.Types.ENEMY_SKILL), "/domain/rpg/images/Slime.png")));
 		bm = new BattleManager(player);
-//		bc = new BattleController(bm);
 		bm.startBattle(enemies);
 //		scan = new BattleScanner(bm);
 		GameView view = new GameView();
 		BattleView battle = new BattleView(view, bm);
-//		battle.setVisible(true);
+		battle.setVisible(true);
+		
 
 	}
 	

@@ -2,6 +2,7 @@ package domain.rpg.combat.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import domain.rpg.actions.*;
 import domain.rpg.combat.manager.BattleManager;
@@ -29,6 +30,7 @@ public class BattleController
 {
 	private BattleManager bm;
 	private Action action;
+	private String message;
 	
 	/**
 	 * 
@@ -49,6 +51,11 @@ public class BattleController
 			removeDeadEnemies(targets);
 			bm.nextTurn();
 		}
+		else 
+		{
+			message = "Action didn't work";
+		}
+		message = action.getMessage();
 	}
 	
 	public void useSkill(Skill skill, Character user, List<Character> targets)
@@ -59,9 +66,10 @@ public class BattleController
 		bm.hasBattleEnded();
 		if (action.isActionComplete())
 		{
-			removeDeadEnemies(targets);
 			bm.nextTurn();
+			removeDeadEnemies(targets);
 		}
+		message = action.getMessage();
 	}
 	
 	
@@ -74,6 +82,7 @@ public class BattleController
 		{
 			bm.nextTurn();
 		}
+		message = action.getMessage();
 	}
 	
 	public void enemyTurn(Character enemy)
@@ -89,21 +98,45 @@ public class BattleController
 		}
 	}
 	
-//	//TODO
-//	public void bossTurn(Boss boss)
-//	{
-//		
-//	}
+	//TODO
+	public void bossTurn(Boss boss)
+	{
+		Random random = new Random();
+		Boolean skill = random.nextInt(4) == 0;
+		if (skill == true && (boss.getCurrentMP() >= boss.getSkill().getCost()))
+		{
+			useSkill(boss.getSkill(), boss, getPlayerArray());
+		}
+		else
+		{
+			useAttack(boss, getPlayerArray());
+		}
+	}
+	
+	
+	public boolean isBossFight()
+	{
+		if (currentTurn().getIsBoss() == true)
+		{
+			return true;
+		}
+		else 
+		{
+			return false;			
+		}
+	}
 	
 	public void removeDeadEnemies(List<Character> targets)
 	{
-		for (Character t : targets)
-		{
-			if (t.getCurrentHP() == 0)
-			{
-				bm.getEnemies().remove(t);
-			}
-		}
+	    List<Character> dead = new ArrayList<>();
+	    for (Character t : targets)
+	    {
+	        if (t.getCurrentHP() == 0)
+	        {
+	            dead.add(t);
+	        }
+	    }
+	    bm.getEnemies().removeAll(dead);
 	}
 	
 	public Character currentTurn()
@@ -141,9 +174,20 @@ public class BattleController
 		return bm.getEnemies();
 	}
 	
+	public ArrayList<Character> getTarget(Character enemy)
+	{
+		int index = getEnemies().indexOf(enemy);
+		return new ArrayList<>(getEnemies().subList(index, index+1));
+	}
+	
 	public BattleManager getManager()
 	{
 		return bm;
+	}
+	
+	public String getMessage()
+	{
+		return message;
 	}
 	
 }

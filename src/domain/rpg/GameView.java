@@ -16,6 +16,11 @@ package domain.rpg;
  */
 
 import javax.swing.*;
+
+import domain.rpg.combat.view.panels.CharacterSetupView;
+import domain.rpg.data.traits.classes.CharacterClass;
+import domain.rpg.data.traits.classes.ClassFactory;
+
 import java.awt.*;
 
 public class GameView extends JFrame {
@@ -47,9 +52,10 @@ public class GameView extends JFrame {
         topPanel.setLayout(new BorderLayout());
         topPanel.setBackground(Color.BLACK);
         topPanel.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+        topPanel.setPreferredSize(new Dimension(970, 231));
 
         gbc.gridy = 0;
-        gbc.weighty = 3.0; // 3/7 ratio
+        gbc.weighty = 0; // fixed size, no stretching
         gbc.insets = new Insets(0, 0, 15, 0);
         splitWrapper.add(topPanel, gbc);
 
@@ -65,9 +71,7 @@ public class GameView extends JFrame {
         textBox.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Sample text
-        textBox.setText("A wild Goblin appeared!\n"
-                + "Hero attacks Goblin for 12 damage.\n"
-                + "Goblin used Scratch! Hero takes 5 damage.\n");
+        textBox.setText("");
 
         textScrollPane = new JScrollPane(textBox);
         textScrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -80,7 +84,7 @@ public class GameView extends JFrame {
         bottomPanel.add(textScrollPane, BorderLayout.CENTER);
 
         gbc.gridy = 1;
-        gbc.weighty = 4.0; // 4/7 ratio
+        gbc.weighty = 1.0; // takes all remaining space
         gbc.insets = new Insets(0, 0, 0, 0);
         splitWrapper.add(bottomPanel, gbc);
 
@@ -88,6 +92,24 @@ public class GameView extends JFrame {
         
         setVisible(true);
     }
+    
+//    public void createSetupView()
+//    {
+//    	CharacterSetupView setup = new CharacterSetupView(this);
+//
+//    	setup.addClass(ClassFactory.fromType(CharacterClass.Types.WARRIOR));
+//    	setup.addClass(ClassFactory.fromType(CharacterClass.Types.MAGE));
+//    	setup.addClass(ClassFactory.fromType(CharacterClass.Types.ROGUE));
+//
+//    	setup.showSetup();
+//
+//    	setup.getYesButton().addActionListener(e -> {
+//    	    String name = setup.getPlayerName();
+//    	    CharacterClass chosenClass = setup.getSelectedClass();
+//    	    setup.remove();
+//    	    // ... create Player with name and chosenClass, start battle ...
+//    	});
+//    }
 
     public JPanel getTopPanel() {
         return topPanel;

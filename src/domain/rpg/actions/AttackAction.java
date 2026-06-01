@@ -39,13 +39,9 @@ public class AttackAction extends Action
 	public void performAction(Character user, List<Character> target)
 	{
 		user.attack(target.getFirst());
-		System.out.println(toString(user, target.getFirst()));
 		setActionComplete(true);
+		setMessage(user.getName() + " attacked " + target.getFirst().getName() + " and did " + user.getAttack() 
+		+ " damage!");
 	}
 	
-	public String toString(Character user, Character target)
-	{
-		return user.getName() + " attacked " + target.getName() + " and did " + user.getAttack() 
-		+ " damage!";
-	}
 }

@@ -3,6 +3,7 @@ package domain.rpg.combat.view.panels;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+import domain.rpg.combat.controller.BattleController;
 import domain.rpg.data.items.Item;
 
 /**
@@ -34,9 +35,11 @@ public class ItemPanel extends JPanel {
     private JTextArea itemDescArea;
     private JButton itemUseButton;
     private JButton backButton;
-    private String selectedItemName;
+    private Item selectedItem;
+    private BattleController bc;
 
-    public ItemPanel() {
+    public ItemPanel(BattleController control) {
+    	bc = control;
         setBackground(Color.BLACK);
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         setPreferredSize(new Dimension(0, 160));
@@ -113,6 +116,9 @@ public class ItemPanel extends JPanel {
         itemUseButton = new JButton("Use");
         styleUseButton(itemUseButton);
         itemUseButton.setEnabled(false);
+        itemUseButton.addActionListener(e -> {
+        	
+        });
 
         JPanel useBtnWrapper = new JPanel(new BorderLayout());
         useBtnWrapper.setBackground(Color.BLACK);
@@ -146,7 +152,7 @@ public class ItemPanel extends JPanel {
         JButton btn = createListButton(item.getName());
         btn.setName(item.getName());
         btn.addActionListener(e -> {
-            selectedItemName = item.getName();
+            selectedItem = item;
             itemNameLabel.setText(item.getName());
             itemDescArea.setText(item.getDescription());
             itemUseButton.setEnabled(true);
@@ -154,15 +160,41 @@ public class ItemPanel extends JPanel {
         itemListPanel.add(btn);
         itemListPanel.revalidate();
     }
+    
+    /** Remove an item from the list by reference. */
+    public void removeItem(Item item) {
+        for (Component c : itemListPanel.getComponents()) {
+            if (c instanceof JButton && c.getName() != null && c.getName().equals(item.getName())) {
+                itemListPanel.remove(c);
+                break;
+            }
+        }
+        // Clear description if the removed item was selected
+        if (selectedItem != null && selectedItem.equals(item)) {
+            clearItemDesc();
+        }
+        itemListPanel.revalidate();
+        itemListPanel.repaint();
+    }
 
     public void clearItems() {
         itemListPanel.removeAll();
         itemNameLabel.setText(" ");
         itemDescArea.setText(" ");
         itemUseButton.setEnabled(false);
-        selectedItemName = null;
+        selectedItem = null;
         itemListPanel.revalidate();
         itemListPanel.repaint();
+    }
+    
+    public void clearItemDesc()
+    {
+        itemNameLabel.setText(" ");
+        itemDescArea.setText(" ");
+        itemUseButton.setEnabled(false);
+        selectedItem = null;
+        itemListPanel.revalidate();
+        itemListPanel.repaint();	
     }
 
     public JButton getUseButton() {
@@ -173,8 +205,8 @@ public class ItemPanel extends JPanel {
         return backButton;
     }
 
-    public String getSelectedItemName() {
-        return selectedItemName;
+    public Item getSelectedItem() {
+        return selectedItem;
     }
 
     // --- Helpers ---

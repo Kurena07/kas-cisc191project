@@ -20,15 +20,16 @@ import javax.swing.ImageIcon;
 
 public class Enemy extends Character
 {
-	private boolean isBoss = false;
 	private ImageIcon sprite;
 	/**
 	 * 
 	 */
-	public Enemy(String name, int hp, int att)
+	public Enemy(String name, int hp, int att, String image)
 	{
 		// TODO check
 		super(name, hp, att, 0);
+		sprite = new ImageIcon(getClass().getResource(image));
+		setIsBoss(false);
 	}
 	
 	/**
@@ -39,16 +40,6 @@ public class Enemy extends Character
 		// TODO check
 		super(name, hp, att, 0);
 		this.sprite = sprite;
-	}
-	
-	public boolean isBoss()
-	{
-		return isBoss;
-	}
-	
-	public void setBoss(boolean isBoss)
-	{
-		this.isBoss = isBoss;
 	}
 	
 	@Override

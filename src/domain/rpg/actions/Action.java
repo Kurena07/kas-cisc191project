@@ -27,18 +27,13 @@ import domain.rpg.data.characters.Character;
 public abstract class Action
 {
 	private boolean actionComplete;
+	private String message;
 	
 	/**
 	 * 
 	 */
 	public Action()
 	{
-	}
-		
-	@Override
-	public String toString()
-	{
-		return "";
 	}
 	
 	public abstract void performAction(Character user, List<Character> target);
@@ -52,7 +47,14 @@ public abstract class Action
 	{
 		this.actionComplete = actionComplete;
 	}
-
 	
+	public void setMessage(String text)
+	{
+		message = text;
+	}
 	
+	public String getMessage()
+	{
+		return message;
+	}
 }

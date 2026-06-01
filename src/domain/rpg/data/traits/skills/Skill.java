@@ -26,12 +26,16 @@ public class Skill
 	private Character user;
 	private Character target;
 	private boolean singleTarget;
+	private String message;
 	
 	public enum Types {
 		ENEMY_SKILL,
 		CHARGED_SLASH,
-		WIDE_SLASH, 
-		
+		WIDE_SLASH,
+		FIRE_BLAST,
+		LIFE_DRAIN,
+		CRITICAL_STRIKE,
+		RAPID_STRIKE
 	};
 	
 	/**
@@ -89,6 +93,16 @@ public class Skill
 	public void setSingleTarget(boolean singleTarget)
 	{
 		this.singleTarget = singleTarget;
+	}
+
+	public String getMessage()
+	{
+		return message;
+	}
+
+	public void setMessage(String message)
+	{
+		this.message = message;
 	}
 	
 	

@@ -25,30 +25,14 @@ public class Boss extends Enemy
 	/**
 	 * 
 	 */
-	public Boss(String name, int hp, int att, int mp, Skill initSkill)
+	public Boss(String name, int hp, int att, int mp, Skill initSkill, String image)
 	{
 		// TODO Auto-generated constructor stub
-		super(name, hp, att);
+		super(name, hp, att, image);
 		setMaxMP(mp);
 		setCurrentMP(mp);
 		skill = initSkill;
-		setBoss(true);
-	}
-	
-	public void useSkill(Skill skill)
-	{
-		if (skill.getCost() > getCurrentMP())
-		{
-			//TODO not enough energy message
-		}
-		else
-		{
-			//otherwise, consume skill points
-			setCurrentMP(getCurrentMP() - skill.getCost());
-			
-			//TODO
-			//and use skill
-		}
+		setIsBoss(true);
 	}
 
 	public Skill getSkill()

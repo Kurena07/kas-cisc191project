@@ -31,9 +31,13 @@ public class ClassFactory
 						SkillFactory.fromType(Types.CHARGED_SLASH), 
 						SkillFactory.fromType(Types.WIDE_SLASH));
 			case MAGE:
-				return new CharacterClass("Mage", 70, 22, 100, null, null);
+				return new CharacterClass("Mage", 70, 22, 100, 
+						SkillFactory.fromType(Types.FIRE_BLAST), 
+						SkillFactory.fromType(Types.LIFE_DRAIN));
 			case ROGUE: 
-				return new CharacterClass("Rogue", 90, 11, 75, null, null);
+				return new CharacterClass("Rogue", 90, 11, 75, 
+						SkillFactory.fromType(Types.CRITICAL_STRIKE),
+						SkillFactory.fromType(Types.RAPID_STRIKE));
 			default:
 				return null;
 		}
